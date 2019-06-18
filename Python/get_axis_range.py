@@ -54,12 +54,20 @@ def get_axis_range(values, leading_digit_count = 1):
     
     if range_max == max_value:
         range_max += resolution
-        
-    range_min = range_max - resolution
+    
+    # To avoid a side-effect while dealing with floating numbers
+    # ,for example, 0.19999999999999937 is returned instead of 0.2
+    range_max_reduced = range_max / resolution
+    range_min_reduced = range_max_reduced - 1
+    min_value_reduced = min_value / resolution
+    
     while True:
-        if range_min < min_value:
+        if range_min_reduced < min_value_reduced:
             break
-        range_min -= resolution
+        range_min_reduced -= 1
+    
+    range_max = range_max_reduced * resolution
+    range_min = range_min_reduced * resolution
     
     return range_min, range_max
     
