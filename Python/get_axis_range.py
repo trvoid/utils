@@ -103,10 +103,10 @@ def get_axis_interval(range_min, range_max, resolution):
     interval = resolution
     count = (range_max - range_min) / interval
     
-    while count < 3 or count > 5:
-        if count > 5:
+    while count < 4 or count > 7:
+        if count > 7:
             interval += resolution
-        elif count < 3:
+        elif count < 4:
             interval /= 10
         count = (range_max - range_min) / interval
         

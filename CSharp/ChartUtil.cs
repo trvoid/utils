@@ -133,13 +133,13 @@ namespace Utils
             double interval = resolution;
             double count = (range_max - range_min) / interval;
 
-            while (count < 3 || count > 5)
+            while (count < 4 || count > 7)
             {
-                if (count > 5)
+                if (count > 7)
                 {
                     interval += resolution;
                 }
-                else if (count < 3)
+                else if (count < 4)
                 {
                     interval /= 10;
                 }
