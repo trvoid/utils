@@ -5,84 +5,137 @@ namespace Utils
 {
     public class ChartUtil
     {
-        private static Tuple<int, int> GetLeadingDigits(double value, int leading_digit_count = 1)
+        private static Tuple<int, int, double> GetLeadingDigits(double value, int leading_digit_count = 1)
         {
-            if (value == 0)
+            if (leading_digit_count < 1)
             {
-                return new Tuple<int, int>(0, 0);
+                throw new ArgumentOutOfRangeException($"leadingDigitCount({leading_digit_count}) is less than 1.");
             }
 
-            double d = value;
+            int s = value >= 0 ? 1 : -1;
+            double d = Math.Abs(value);
             int p = 0;
 
-            double lb = Math.Pow(10, leading_digit_count - 1);
-            double ub = Math.Pow(10, leading_digit_count);
-
-            if (d >= lb)
+            if (d > 0)
             {
-                while (true)
+                double lb = Math.Pow(10, leading_digit_count - 1);
+                double ub = Math.Pow(10, leading_digit_count);
+
+                if (d >= lb)
                 {
-                    if (d < ub)
-                        break;
-                    p += 1;
-                    d /= 10;
+                    while (true)
+                    {
+                        if (d < ub)
+                            break;
+                        p += 1;
+                        d /= 10;
+                    }
+                }
+                else
+                {
+                    while (true)
+                    {
+                        if (d >= lb)
+                            break;
+                        p -= 1;
+                        d *= 10;
+                    }
                 }
             }
-            else
-            {
-                while (true)
-                {
-                    if (d >= lb)
-                        break;
-                    p -= 1;
-                    d *= 10;
-                }
-            }
 
-            return new Tuple<int, int>((int)d, p);
+            return new Tuple<int, int, double>(s, (int)d, Math.Pow(10, p));
         }
 
-        private static Tuple<double, int> GetCeil(double value, int leading_digit_count = 1)
+        private static Tuple<double, double> GetFloor(double value, int leading_digit_count = 1)
         {
             var ret = GetLeadingDigits(value, leading_digit_count);
-            double _value = ret.Item1 * Math.Pow(10, ret.Item2);
-            if (_value != value)
+            double _value = ret.Item1 * ret.Item2 * ret.Item3;
+            if (value < 0 && _value != value)
             {
-                _value += Math.Pow(10, ret.Item2);
+                _value -= ret.Item3;
             }
-            return new Tuple<double, int>(_value, ret.Item2);
+            return new Tuple<double, double>(_value, ret.Item3);
         }
 
+        private static Tuple<double, double> GetCeil(double value, int leading_digit_count = 1)
+        {
+            var ret = GetLeadingDigits(value, leading_digit_count);
+            double _value = ret.Item1 * ret.Item2 * ret.Item3;
+            if (value > 0 && _value != value)
+            {
+                _value += ret.Item3;
+            }
+            return new Tuple<double, double>(_value, ret.Item3);
+        }
+
+
+        // Get an axis range for given values.
+        // 
+        // Example:
+        //     For a value range (-41 ~ 35), axis range can be
+        //         (-50 ~ 40) if leading digit count is 1, or
+        //         (-42 ~ 36) if leading digit count is 2.
         public static Tuple<double, double> GetAxisRange(double[] values, int leading_digit_count = 1)
         {
             double min_value = values.Min();
             double max_value = values.Max();
 
-            var ret = GetCeil(max_value, leading_digit_count);
-            double range_max = ret.Item1;
-            double resolution = Math.Pow(10, ret.Item2);
-
-            if (range_max == max_value)
+            if (Math.Abs(max_value) >= Math.Abs(min_value))
             {
-                range_max += resolution;
-            }
+                var ret = GetCeil(max_value, leading_digit_count);
+                double range_max = ret.Item1;
+                double resolution = ret.Item2;
 
-            double range_max_reduced = range_max / resolution;
-            double range_min_reduced = range_max_reduced - 1;
-            double min_value_reduced = min_value / resolution;
-
-            while (true)
-            {
-                if (range_min_reduced < min_value_reduced)
+                if (range_max == max_value)
                 {
-                    break;
+                    range_max += resolution;
                 }
-                range_min_reduced -= 1;
+
+                double range_max_reduced = range_max / resolution;
+                double range_min_reduced = range_max_reduced - 1;
+                double min_value_reduced = min_value / resolution;
+
+                while (true)
+                {
+                    if (range_min_reduced < min_value_reduced)
+                    {
+                        break;
+                    }
+                    range_min_reduced -= 1;
+                }
+
+                double range_min = range_min_reduced * resolution;
+
+                return new Tuple<double, double>(range_min, range_max);
             }
+            else
+            {
+                var ret = GetFloor(min_value, leading_digit_count);
+                double range_min = ret.Item1;
+                double resolution = ret.Item2;
 
-            double range_min = range_min_reduced * resolution;
+                if (range_min == min_value)
+                {
+                    range_min -= resolution;
+                }
 
-            return new Tuple<double, double>(range_min, range_max);
+                double range_min_reduced = range_min / resolution;
+                double range_max_reduced = range_min_reduced + 1;
+                double max_value_reduced = max_value / resolution;
+
+                while (true)
+                {
+                    if (range_max_reduced > max_value_reduced)
+                    {
+                        break;
+                    }
+                    range_max_reduced += 1;
+                }
+
+                double range_max = range_max_reduced * resolution;
+
+                return new Tuple<double, double>(range_min, range_max);
+            }
         }
     }
 }
