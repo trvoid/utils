@@ -66,9 +66,6 @@ def get_axis_range(values, leading_digit_count = 1):
     if abs(max_value) >= abs(min_value):
         range_max, resolution = get_ceil(max_value, leading_digit_count)
         
-        if range_max == max_value:
-            range_max += resolution
-        
         # To avoid a side-effect while dealing with floating numbers
         # ,for example, 0.19999999999999937 is returned instead of 0.2
         range_max_reduced = range_max / resolution
@@ -76,7 +73,7 @@ def get_axis_range(values, leading_digit_count = 1):
         min_value_reduced = min_value / resolution
         
         while True:
-            if range_min_reduced < min_value_reduced:
+            if range_min_reduced <= min_value_reduced:
                 break
             range_min_reduced -= 1
         
@@ -85,9 +82,6 @@ def get_axis_range(values, leading_digit_count = 1):
     else:
         range_min, resolution = get_floor(min_value, leading_digit_count)
         
-        if range_min == min_value:
-            range_min -= resolution
-        
         # To avoid a side-effect while dealing with floating numbers
         # ,for example, 0.19999999999999937 is returned instead of 0.2
         range_min_reduced = range_min / resolution
@@ -95,14 +89,14 @@ def get_axis_range(values, leading_digit_count = 1):
         max_value_reduced = max_value / resolution
         
         while True:
-            if range_max_reduced > max_value_reduced:
+            if range_max_reduced >= max_value_reduced:
                 break
             range_max_reduced += 1
         
         range_max = range_max_reduced * resolution
         range_min = range_min_reduced * resolution
         
-    return range_min, range_max
+    return range_min, range_max, resolution
     
 def print_usage(script_name):
     print(f'Usage: python {script_name} <min_value> <max_value> <leading_digit_count>')
@@ -112,9 +106,9 @@ def print_usage(script_name):
 
 def main(min_value, max_value, leading_digit_count):
     values = [min_value, max_value]
-    range_min, range_max = get_axis_range(values, leading_digit_count)
+    range_min, range_max, resolution = get_axis_range(values, leading_digit_count)
     
-    print(f'value range: {min_value} ~ {max_value} ==> axis range: {range_min} ~ {range_max}')
+    print(f'value range: {min_value} ~ {max_value} ==> axis range: {range_min} ~ {range_max}, resolution: {resolution}')
     
 ################################################################################
 # Configuration                                                                #

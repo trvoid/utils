@@ -75,7 +75,7 @@ namespace Utils
         //     For a value range (-41 ~ 35), axis range can be
         //         (-50 ~ 40) if leading digit count is 1, or
         //         (-42 ~ 36) if leading digit count is 2.
-        public static Tuple<double, double> GetAxisRange(double[] values, int leading_digit_count = 1)
+        public static Tuple<double, double, double> GetAxisRange(double[] values, int leading_digit_count = 1)
         {
             double min_value = values.Min();
             double max_value = values.Max();
@@ -86,18 +86,13 @@ namespace Utils
                 double range_max = ret.Item1;
                 double resolution = ret.Item2;
 
-                if (range_max == max_value)
-                {
-                    range_max += resolution;
-                }
-
                 double range_max_reduced = range_max / resolution;
                 double range_min_reduced = range_max_reduced - 1;
                 double min_value_reduced = min_value / resolution;
 
                 while (true)
                 {
-                    if (range_min_reduced < min_value_reduced)
+                    if (range_min_reduced <= min_value_reduced)
                     {
                         break;
                     }
@@ -106,7 +101,7 @@ namespace Utils
 
                 double range_min = range_min_reduced * resolution;
 
-                return new Tuple<double, double>(range_min, range_max);
+                return new Tuple<double, double>(range_min, range_max, resolution);
             }
             else
             {
@@ -114,18 +109,13 @@ namespace Utils
                 double range_min = ret.Item1;
                 double resolution = ret.Item2;
 
-                if (range_min == min_value)
-                {
-                    range_min -= resolution;
-                }
-
                 double range_min_reduced = range_min / resolution;
                 double range_max_reduced = range_min_reduced + 1;
                 double max_value_reduced = max_value / resolution;
 
                 while (true)
                 {
-                    if (range_max_reduced > max_value_reduced)
+                    if (range_max_reduced >= max_value_reduced)
                     {
                         break;
                     }
@@ -134,7 +124,7 @@ namespace Utils
 
                 double range_max = range_max_reduced * resolution;
 
-                return new Tuple<double, double>(range_min, range_max);
+                return new Tuple<double, double>(range_min, range_max, resolution);
             }
         }
     }
