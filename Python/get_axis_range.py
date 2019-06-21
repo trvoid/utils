@@ -8,6 +8,7 @@
 ################################################################################
 
 import sys
+import numpy
 
 ################################################################################
 # Functions                                                                    #
@@ -98,6 +99,19 @@ def get_axis_range(values, leading_digit_count = 1):
         
     return range_min, range_max, resolution
     
+def get_axis_interval(range_min, range_max, resolution):
+    interval = resolution
+    count = (range_max - range_min) / interval
+    
+    while count < 3 or count > 5:
+        if count > 5:
+            interval += resolution
+        elif count < 3:
+            interval /= 10
+        count = (range_max - range_min) / interval
+        
+    return interval
+    
 def print_usage(script_name):
     print(f'Usage: python {script_name} <min_value> <max_value> <leading_digit_count>')
     print(f'        - min_value: float number')
@@ -107,8 +121,13 @@ def print_usage(script_name):
 def main(min_value, max_value, leading_digit_count):
     values = [min_value, max_value]
     range_min, range_max, resolution = get_axis_range(values, leading_digit_count)
+    interval = get_axis_interval(range_min, range_max, resolution)
     
-    print(f'value range: {min_value} ~ {max_value} ==> axis range: {range_min} ~ {range_max}, resolution: {resolution}')
+    print(f'[{min_value} ~ {max_value}]')
+    print(f'        ==> axis range: {range_min} ~ {range_max}')
+    print(f'        ==> resolution: {resolution}')
+    print(f'        ==>   interval: {interval}')
+    print(f'        ==>      ticks: {numpy.arange(range_min, range_max, interval)}')
     
 ################################################################################
 # Configuration                                                                #

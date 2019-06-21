@@ -101,7 +101,7 @@ namespace Utils
 
                 double range_min = range_min_reduced * resolution;
 
-                return new Tuple<double, double>(range_min, range_max, resolution);
+                return new Tuple<double, double, double>(range_min, range_max, resolution);
             }
             else
             {
@@ -124,8 +124,30 @@ namespace Utils
 
                 double range_max = range_max_reduced * resolution;
 
-                return new Tuple<double, double>(range_min, range_max, resolution);
+                return new Tuple<double, double, double>(range_min, range_max, resolution);
             }
+        }
+
+        public static double GetAxisInterval(double range_min, double range_max, double resolution)
+        {
+            double interval = resolution;
+            double count = (range_max - range_min) / interval;
+
+            while (count < 3 || count > 5)
+            {
+                if (count > 5)
+                {
+                    interval += resolution;
+                }
+                else if (count < 3)
+                {
+                    interval /= 10;
+                }
+
+                count = (range_max - range_min) / interval;
+            }
+
+            return interval;
         }
     }
 }
